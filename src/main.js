@@ -36,15 +36,22 @@ window.Game = (function () {
     Player.init(canvas, room.colliders);
     Dialog.init(); Mini.init();
     resize(); addEventListener('resize', resize);
+    // phones report the new size a bit after turning and when the browser bars hide
+    addEventListener('orientationchange', () => setTimeout(resize, 300));
+    if (window.visualViewport) visualViewport.addEventListener('resize', resize);
     document.body.classList.toggle('touch', touch);
 
     addEventListener('keydown', onKey);
-    $('startBtn').addEventListener('click', () => { Sfx.unlock(); start(); });
+    $('startBtn').addEventListener('click', () => { Sfx.unlock(); goFullscreen(); start(); });
+    // iPhone Safari cannot go fullscreen from a page: suggest adding the game to the home screen
+    const ios = /iPhone|iPod/.test(navigator.userAgent);
+    const standalone = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    $('iosHint').classList.toggle('hidden', !(ios && !standalone));
     $('btnUse').addEventListener('click', e => { e.stopPropagation(); if (G && G.hidden) unhide(); else useTarget(); });
     $('btnPause').addEventListener('click', e => { e.stopPropagation(); togglePause(); });
     $('resumeBtn').addEventListener('click', () => togglePause(false));
     $('menuBtn').addEventListener('click', () => toMenu());
-    $('againBtn').addEventListener('click', () => { Sfx.unlock(); start(); });
+    $('againBtn').addEventListener('click', () => { Sfx.unlock(); goFullscreen(); start(); });
     $('endMenuBtn').addEventListener('click', () => toMenu());
     $('autoBtn').addEventListener('click', () => setAuto(!auto));
     document.addEventListener('pointerlockchange', () => { $('crosshair').classList.toggle('locked', !!document.pointerLockElement); });
@@ -58,6 +65,18 @@ window.Game = (function () {
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
+  }
+
+  // phones (Android Chrome): hide the browser bars and keep the screen horizontal; silently skipped where not supported
+  function goFullscreen() {
+    if (!touch || auto) return;
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || document.fullscreenElement || document.webkitFullscreenElement) return;
+    try {
+      const p = req.call(el, { navigationUI: 'hide' });
+      const lock = () => { try { const q = screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'); if (q && q.catch) q.catch(() => {}); } catch (e) {} };
+      if (p && p.then) p.then(lock, () => {}); else lock();
+    } catch (e) {}
   }
 
   function resize() {
@@ -709,9 +728,16 @@ window.Game = (function () {
     const showPrompt = target && scene === 'play';
     $('prompt').style.display = showPrompt ? 'block' : 'none';
     if (showPrompt) $('prompt').innerHTML = touch ? target.label() : `<b>E</b> ${target.label()}`;
-    const useBtn = (showPrompt || (G && G.hidden)) && touch;
+    // on a phone the action button is always there: dim when there is nothing to use, bright with a label when there is
+    const useBtn = touch && scene === 'play' && G && (G.hidden || !busy());
+    const canUse = useBtn && (G.hidden || showPrompt);
     $('btnUse').classList.toggle('hidden', !useBtn);
-    if (useBtn) $('btnUse').textContent = G.hidden ? 'Вылезти' : target.label();
+    $('btnUse').classList.toggle('idle', useBtn && !canUse);
+    if (useBtn) $('btnUse').textContent = G.hidden ? 'Вылезти' : canUse ? target.label() : 'Действие';
+    $('joy').style.display = touch && scene === 'play' && !busy() && !(G && G.hidden) ? '' : 'none';
+    const help = touch && scene === 'play' && !busy() && !(G && G.hidden);
+    $('helpMove').style.display = help && !Player.st.usedMove ? 'block' : 'none';
+    $('helpLook').style.display = help && !Player.st.usedLook ? 'block' : 'none';
     $('hintKeys').style.display = busy() || touch ? 'none' : 'block';
     $('crosshair').style.display = busy() || (G && G.hidden) ? 'none' : 'block';
     $('keyIcon').style.display = G && G.hasKey ? 'block' : 'none';

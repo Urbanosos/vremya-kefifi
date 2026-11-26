@@ -32,9 +32,13 @@ window.Player = (function () {
     canvas.addEventListener('touchstart', e => {
       for (const t of e.changedTouches) {
         if (t.clientX < innerWidth * 0.4 && joy.id === null) {
-          joy = { id: t.identifier, x0: t.clientX, y0: t.clientY, dx: 0, dy: 0 };
-          const j = joyEl(); j.style.left = (t.clientX - 60) + 'px'; j.style.top = (t.clientY - 60) + 'px'; j.classList.add('active');
-        } else if (look.id === null) look = { id: t.identifier, x: t.clientX, y: t.clientY };
+          // the stick jumps under the thumb, but its base never leaves the screen
+          const j = joyEl(), half = j.offsetWidth / 2 || 60;
+          const cx = Math.max(half + 4, Math.min(innerWidth - half - 4, t.clientX)), cy = Math.max(half + 4, Math.min(innerHeight - half - 4, t.clientY));
+          joy = { id: t.identifier, x0: cx, y0: cy, dx: 0, dy: 0 };
+          j.style.left = (cx - half) + 'px'; j.style.top = (cy - half) + 'px'; j.classList.add('active');
+          st.usedMove = true;
+        } else if (look.id === null) { look = { id: t.identifier, x: t.clientX, y: t.clientY }; st.usedLook = true; }
       }
       e.preventDefault();
     }, { passive: false });
@@ -42,7 +46,7 @@ window.Player = (function () {
       for (const t of e.changedTouches) {
         if (t.identifier === joy.id) {
           let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0;
-          const len = Math.hypot(dx, dy), max = 50;
+          const len = Math.hypot(dx, dy), max = (joyEl().offsetWidth / 2 || 60) * 0.8;
           if (len > max) { dx *= max / len; dy *= max / len; }
           joy.dx = dx / max; joy.dy = dy / max;
           knobEl().style.transform = `translate(${dx}px, ${dy}px)`;
@@ -55,12 +59,19 @@ window.Player = (function () {
     }, { passive: false });
     const end = e => {
       for (const t of e.changedTouches) {
-        if (t.identifier === joy.id) { joy = { id: null, dx: 0, dy: 0 }; knobEl().style.transform = ''; joyEl().classList.remove('active'); }
+        if (t.identifier === joy.id) releaseJoy();
         if (t.identifier === look.id) look = { id: null };
       }
     };
     canvas.addEventListener('touchend', end);
     canvas.addEventListener('touchcancel', end);
+  }
+
+  // back to the resting place in the corner, so the stick is always visible
+  function releaseJoy() {
+    joy = { id: null, dx: 0, dy: 0 };
+    const j = joyEl(); if (!j) return;
+    knobEl().style.transform = ''; j.classList.remove('active'); j.style.left = ''; j.style.top = '';
   }
 
   function turn(dx, dy) {
@@ -76,7 +87,7 @@ window.Player = (function () {
     enabled = on;
     if (!on) {
       if (document.pointerLockElement && document.exitPointerLock) document.exitPointerLock();
-      joy = { id: null, dx: 0, dy: 0 }; look = { id: null };
+      releaseJoy(); look = { id: null };
       for (const k in keys) keys[k] = false;
     }
   }
