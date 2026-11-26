@@ -1,0 +1,9 @@
+{
+  "name": "game-tools",
+  "private": true,
+  "type": "module",
+  "description": "Проверки игры: playtest.mjs (нейросеть играет сама) и simulate.mjs (сотни партий для баланса)",
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
+}

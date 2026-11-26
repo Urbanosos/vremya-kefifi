@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Время Кэфифи</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="task"></div>
+  <div id="crosshair"></div>
+  <div id="prompt"></div>
+  <div id="toast"></div>
+  <div id="keyIcon" title="Ключ">🔑</div>
+  <div id="chocIcon" title="Шоколадка">🍫</div>
+  <div id="hintKeys">WASD — идти · мышь — смотреть (кликни по экрану) · E — действие · Esc — пауза</div>
+  <div id="btnPause" class="roundbtn">❚❚</div>
+  <div id="btnUse" class="hidden"></div>
+  <div id="joy"><div id="joyKnob"></div></div>
+</div>
+
+<div id="chaseVignette" class="hidden"></div>
+<div id="hideOverlay" class="hidden"><div id="hideText"></div></div>
+
+<div id="moodBar"><span class="face">😊</span><div class="track"><div id="moodFill"></div></div></div>
+
+<div id="dialog" class="hidden">
+  <img id="dlgPortrait" alt="">
+  <div class="box">
+    <div id="dlgName"></div>
+    <div id="dlgText"></div>
+    <div id="dlgChoices"></div>
+    <div id="dlgNext">▼</div>
+  </div>
+</div>
+
+<div id="mg" class="hidden"></div>
+
+<div id="screamer" class="hidden"><div class="face"></div></div>
+<div id="smoke"></div>
+<div id="fade"><div id="fadeText"></div></div>
+
+<div id="start" class="screen">
+  <div class="card startcard">
+    <img id="startKef" alt="">
+    <div class="startcol">
+      <h1>Время Кэфифи</h1>
+      <p class="sub">Ты пришёл к Кэфифи с ночёвкой. Её родители уехали отдыхать.<br>Выполняй все её задания… иначе она погонится за тобой.</p>
+      <div class="row"><div id="startBtn" class="btn big">Начать</div></div>
+      <p class="small">Компьютер: WASD — идти, мышь — смотреть, E — действие.<br>Телефон: держи горизонтально, слева джойстик, справа смотреть.</p>
+      <div class="endings"><b>Концовки</b><div id="endList"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="pause" class="screen hidden">
+  <div class="card">
+    <h2>Пауза</h2>
+    <div class="col">
+      <div id="resumeBtn" class="btn">Продолжить</div>
+      <div id="autoBtn" class="btn">Авто: выкл</div>
+      <div id="menuBtn" class="btn">В меню</div>
+    </div>
+  </div>
+</div>
+
+<div id="ending" class="screen hidden">
+  <div class="card">
+    <h1 id="endTitle">Конец</h1>
+    <h2 id="endName"></h2>
+    <p id="endText"></p>
+    <p id="endFound" class="small"></p>
+    <div class="row"><div id="againBtn" class="btn">Сыграть снова</div><div id="endMenuBtn" class="btn">В меню</div></div>
+  </div>
+</div>
+
+<div id="rotate"><div>Поверни телефон горизонтально 📱↻</div></div>
+
+<script src="lib/three.min.js"></script>
+<script src="assets/kefifi/images.js"></script>
+<script src="assets/kefifi/dance.js"></script>
+<script src="src/config.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/room.js"></script>
+<script src="src/nav.js"></script>
+<script src="src/player.js"></script>
+<script src="src/kefifi.js"></script>
+<script src="src/dialog.js"></script>
+<script src="src/games.js"></script>
+<script src="src/main.js"></script>
+<script>
+  document.getElementById('startKef').src = window.KEFIFI_IMG.happy;
+  document.querySelector('#screamer .face').style.backgroundImage = `url(${window.KEFIFI_IMG.scream})`;
+</script>
+</body>
+</html>

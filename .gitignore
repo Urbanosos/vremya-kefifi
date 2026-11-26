@@ -1,0 +1,14 @@
+# Reference videos: too big for GitHub (100 MB limit) and a real room on camera
+*.MOV
+*.mov
+*.MP4
+*.mp4
+# Screenshots of another game used only as style reference
+/примеры/
+# Example game from the starter kit, not part of this game
+/pervaya_versiya/
+# Local saves and tool output
+/.checkpoints/
+/tools/node_modules/
+/tools/out/
+.DS_Store
